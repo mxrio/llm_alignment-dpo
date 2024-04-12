@@ -32,11 +32,11 @@ def write_to_csv(data, filename):
         writer.writerow(data)
 
 # Main function
-def main(measurement_duration):
+def main():
     start_time = time.time()
 
     # Create CSV file for logging
-    csv_filename = "measurement_logs.csv"
+    csv_filename = "data/measurement_logs.csv"
     csv_header = ['Timestamp', 'Duration', 'CPU Usage (%)', 'Memory Usage (%)', 'Swap Usage (%)', 'GPU Usage (%)', 'Network Sent (bytes)', 'Network Received (bytes)']
     if not os.path.isfile(csv_filename):
         with open(csv_filename, 'w', newline='') as csvfile:
@@ -44,16 +44,20 @@ def main(measurement_duration):
             writer.writerow(csv_header)
 
     # Measure system performance
-    while (time.time() - start_time) < measurement_duration:
+    # while (time.time() - start_time) < measurement_duration:
+    while True:
         cpu_percent, memory_percent, swap_percent, bytes_sent, bytes_received = measure_system_performance()
         gpu_usage = measure_gpu_performance()
         current_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         duration = round(time.time() - start_time, 2)
         data_row = [current_time, duration, cpu_percent, memory_percent, swap_percent] + gpu_usage + [bytes_sent, bytes_received]
         write_to_csv(data_row, csv_filename)
-        print('Measurement cycle completed. Data is stored.')
+        # print('Measurement cycle completed. Data is stored.')
         time.sleep(5)  # Adjust sleep time to control the measurement frequency
 
 if __name__ == "__main__":
-    measurement_duration = 60  # Duration in seconds for measurement
-    main(measurement_duration)
+    print('Measurement startet')
+
+    main()
+    
+    print('Measurement stopped')
