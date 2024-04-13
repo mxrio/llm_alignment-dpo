@@ -12,8 +12,8 @@ def main():
     pref_data_labeled_training = pd.read_feather('data/pref_data_labeled.feather')[:10]
 
     # Define annotation parameters
-    # amount_samples = 5                    # for testing purposes, set to 2
-    amount_samples = pref_data_labeled_sample.shape[0]
+    amount_samples = 5                    # for testing purposes, set to 2
+    # amount_samples = pref_data_labeled_sample.shape[0]
     annotation_llm = 'llama2'       # possible others: llama2:13b-chat, llama2:70b-chat
 
 
@@ -143,45 +143,49 @@ def main():
     ai_feedback = pd.DataFrame(columns=['human', 'ai', 'ai_reversed', 'duration_ai', 'duration_ai_reversed', 'response_ai', 'response_ai_reversed'])
     ai_feedback['human'] = (pref_data_labeled_sample['preference']+1).copy()
     ai_feedback = ai_feedback.reset_index(drop=True)
-
-    # Write Dataframe
     
-
-    for i in range(amount_samples):
-        annotation_ai = get_annotation(pref_data_labeled_sample, pref_data_labeled_training, annotation_llm, i).json()
-        annotation_ai_reversed = get_annotation(pref_data_labeled_sample, pref_data_labeled_training, annotation_llm, i, reversed_order=True).json()
-
-        ai_feedback.loc[i, 'ai'] = annotation_ai['message']['content']
-        ai_feedback.loc[i, 'ai_reversed'] = annotation_ai_reversed['message']['content']
-        # ai_feedback.loc[i, 'duration_ai'] = round(annotation_ai['total_duration']/(1000000000), 2)
-        # ai_feedback.loc[i, 'duration_ai_reversed'] = round(annotation_ai_reversed['total_duration']/(1000000000), 2)
-        ai_feedback.loc[i, 'response_ai'] = str(annotation_ai)
-        ai_feedback.loc[i, 'response_ai_reversed'] = str(annotation_ai_reversed)
-        
-        # Estimate remaining time
-        remaining_iterations = amount_samples - i - 1
-        average_duration = round(((ai_feedback['duration_ai'].mean() + ai_feedback['duration_ai_reversed'].mean()) / 2)/60, 2)
-        estimated_time_left = remaining_iterations * average_duration
-
-        print(i+1,'/', amount_samples, 'samples annotated. \t Estimated time left:', estimated_time_left, 'minutes')
-
-    # Save the Annotation Data
+    # Start timer
+    start_time = time.time()
     current_date = time.strftime("%Y-%m-%d")
 
-    ai_feedback.to_feather(f'data/ai_feedback-{annotation_llm}-{current_date}.feather')
+    for sample in range(amount_samples):
+        if sample % 25 == 0:
+            ai_feedback.to_feather(f'data/ai_feedback-{annotation_llm}-{current_date}.feather')
+            print('Annotation data saved')
+
+        annotation_ai = get_annotation(pref_data_labeled_sample, pref_data_labeled_training, annotation_llm, sample).json()
+        annotation_ai_reversed = get_annotation(pref_data_labeled_sample, pref_data_labeled_training, annotation_llm, sample, reversed_order=True).json()
+
+        ai_feedback.loc[sample, 'ai'] = annotation_ai['message']['content']
+        ai_feedback.loc[sample, 'ai_reversed'] = annotation_ai_reversed['message']['content']
+        # ai_feedback.loc[i, 'duration_ai'] = round(annotation_ai['total_duration']/(1000000000), 2)
+        # ai_feedback.loc[i, 'duration_ai_reversed'] = round(annotation_ai_reversed['total_duration']/(1000000000), 2)
+        ai_feedback.loc[sample, 'response_ai'] = str(annotation_ai)
+        ai_feedback.loc[sample, 'response_ai_reversed'] = str(annotation_ai_reversed)
+        
+        # Estimate remaining time
+        remaining_iterations = amount_samples - sample - 1
+        current_duration = time.time() - start_time
+        average_duration = round(current_duration / (sample+1) / 60, 2) 
+        # average_duration = round(((ai_feedback['duration_ai'].mean() + ai_feedback['duration_ai_reversed'].mean()) / 2)/60, 2)
+        estimated_time_left = remaining_iterations * average_duration
+
+        print(sample+1,'/', amount_samples, 'samples annotated. \t Estimated time left:', estimated_time_left, 'minutes')
+
+
 
 if __name__ == "__main__":
     # start measurement
-    measurement_process = subprocess.Popen(["python", "measuring_usage.py"])
+    # measurement_process = subprocess.Popen(["python", "measuring_usage.py"])
 
-    time.sleep(10)
+    # time.sleep(10)
     print('Annotation started')
     main()
     print('Annotation done')
-    time.sleep(10)
+    # time.sleep(10)
     
     # stop measurement
-    measurement_process.terminate()
+    # measurement_process.terminate()
 
     print('All done!')
 
