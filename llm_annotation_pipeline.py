@@ -12,7 +12,7 @@ def main():
     pref_data_labeled_training = pd.read_feather('data/pref_data_labeled.feather')[:10]
 
     # Define annotation parameters
-    amount_samples = 5                    # for testing purposes, set to 2
+    amount_samples = 55                    # for testing purposes
     # amount_samples = pref_data_labeled_sample.shape[0]
     annotation_llm = 'llama2'       # possible others: llama2:13b-chat, llama2:70b-chat
 
@@ -148,8 +148,10 @@ def main():
     start_time = time.time()
     current_date = time.strftime("%Y-%m-%d")
 
+    annotation_checkpoints = 25
+
     for sample in range(amount_samples):
-        if sample % 25 == 0:
+        if sample % annotation_checkpoints == 0:
             ai_feedback.to_feather(f'data/ai_feedback-{annotation_llm}-{current_date}.feather')
             print('Annotation data saved')
 
