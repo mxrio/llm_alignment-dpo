@@ -7,8 +7,7 @@ import subprocess
 
 def main():
     # Load the labeled preference data
-    pref_data_labeled_sample = pd.read_feather('data/pref_data_labeled.feather').sample(n=60000, random_state=42)
-    pref_data_labeled_sample = pref_data_labeled_sample.reset_index(drop=True)
+    pref_data_labeled_sample = pd.read_feather('data/pref_data_labeled-60k_sample.feather')
     pref_data_labeled_training = pd.read_feather('data/pref_data_labeled.feather')[:10]
 
     # Define annotation parameters
