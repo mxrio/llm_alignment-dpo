@@ -12,8 +12,8 @@ def main():
     pref_data_labeled_training = pd.read_feather('data/pref_data_labeled.feather')[:10]
 
     # Define annotation parameters
-    amount_samples = 5                    # for testing purposes, set to 2
-    # amount_samples = pref_data_labeled_sample.shape[0]
+    # amount_samples = 5                    # for testing purposes, set to 2
+    amount_samples = pref_data_labeled_sample.shape[0]
     annotation_llm = 'llama2'       # possible others: llama2:13b-chat, llama2:70b-chat
 
 
@@ -139,10 +139,13 @@ def main():
         return response
 
 
-    # Dataframe to store the LLM feedback
+    # Create Dataframe to store the LLM feedback
     ai_feedback = pd.DataFrame(columns=['human', 'ai', 'ai_reversed', 'duration_ai', 'duration_ai_reversed', 'response_ai', 'response_ai_reversed'])
     ai_feedback['human'] = (pref_data_labeled_sample['preference']+1).copy()
     ai_feedback = ai_feedback.reset_index(drop=True)
+
+    # Write Dataframe
+    
 
     for i in range(amount_samples):
         annotation_ai = get_annotation(pref_data_labeled_sample, pref_data_labeled_training, annotation_llm, i).json()
@@ -150,8 +153,8 @@ def main():
 
         ai_feedback.loc[i, 'ai'] = annotation_ai['message']['content']
         ai_feedback.loc[i, 'ai_reversed'] = annotation_ai_reversed['message']['content']
-        ai_feedback.loc[i, 'duration_ai'] = round(annotation_ai['total_duration']/(1000000000), 2)
-        ai_feedback.loc[i, 'duration_ai_reversed'] = round(annotation_ai_reversed['total_duration']/(1000000000), 2)
+        # ai_feedback.loc[i, 'duration_ai'] = round(annotation_ai['total_duration']/(1000000000), 2)
+        # ai_feedback.loc[i, 'duration_ai_reversed'] = round(annotation_ai_reversed['total_duration']/(1000000000), 2)
         ai_feedback.loc[i, 'response_ai'] = str(annotation_ai)
         ai_feedback.loc[i, 'response_ai_reversed'] = str(annotation_ai_reversed)
         
