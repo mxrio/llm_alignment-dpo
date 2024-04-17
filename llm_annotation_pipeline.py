@@ -153,7 +153,7 @@ def main():
 
     for sample in range(last_checkpoint, amount_samples):
         if sample % annotation_checkpoints == 0:
-            ai_feedback.to_feather(f'data/ai_feedback-{annotation_llm}-{current_date}-v2.feather')
+            ai_feedback.to_feather(f'data/ai_feedback-{annotation_llm}-{current_date}.feather')
             print('Annotation data saved')
 
         annotation_ai = get_annotation(pref_data_labeled_sample, pref_data_labeled_training, annotation_llm, sample).json()
@@ -174,7 +174,7 @@ def main():
         estimated_time_left = remaining_iterations * average_duration
 
         print(sample+1,'/', amount_samples, 'samples annotated. \t Estimated time left:', estimated_time_left, 'minutes')
-
+    ai_feedback.to_feather(f'data/ai_feedback-{annotation_llm}-{current_date}.feather')
 
 
 if __name__ == "__main__":
