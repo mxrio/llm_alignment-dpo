@@ -9,3 +9,7 @@ data/zephyr-7b-dpo-lora/tokenizer.json
 data/zephyr-7b-dpo-lora/config.json
 data/zephyr-7b-dpo-lora/generation_config.json
 data/zephyr-7b-dpo-lora/model.safetensors.index.json
+
+data/custom_pref_data_7b.pickle
+data/custom_pref_data_13b.pickle
+data/custom_pref_data_70b.pickle

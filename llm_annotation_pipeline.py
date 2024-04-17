@@ -141,20 +141,19 @@ def main():
 
 
     # Create Dataframe to store the LLM feedback
-    # ai_feedback = pd.DataFrame(columns=['human', 'ai', 'ai_reversed', 'duration_ai', 'duration_ai_reversed', 'response_ai', 'response_ai_reversed'])
-    # ai_feedback['human'] = (pref_data_labeled_sample['preference']+1).copy()
-    # ai_feedback = ai_feedback.reset_index(drop=True)
-    ai_feedback = pd.read_feather('data/ai_feedback-llama2-2024-04-16-v2.feather')
-
+    ai_feedback = pd.DataFrame(columns=['human', 'ai', 'ai_reversed', 'duration_ai', 'duration_ai_reversed', 'response_ai', 'response_ai_reversed'])
+    ai_feedback['human'] = (pref_data_labeled_sample['preference']+1).copy()
+    ai_feedback = ai_feedback.reset_index(drop=True)
+    # ai_feedback = pd.read_feather('data/ai_feedback-llama2-2024-04-14.feather')
 
     # Start timer
     start_time = time.time()
     current_date = time.strftime("%Y-%m-%d")
 
     annotation_checkpoints = 25
-    amount_samples = 53125
+    last_checkpoint = 0
 
-    for sample in range(52450, amount_samples):
+    for sample in range(last_checkpoint, amount_samples):
         if sample % annotation_checkpoints == 0:
             ai_feedback.to_feather(f'data/ai_feedback-{annotation_llm}-{current_date}-v3.feather')
             print('Annotation data saved')
@@ -172,28 +171,26 @@ def main():
         # Estimate remaining time
         remaining_iterations = amount_samples - sample - 1
         current_duration = time.time() - start_time
-        average_duration = round(current_duration / (sample+1-52450) / 60, 2) 
+        average_duration = round(current_duration / (sample+1-last_checkpoint) / 60, 2) 
         # average_duration = round(((ai_feedback['duration_ai'].mean() + ai_feedback['duration_ai_reversed'].mean()) / 2)/60, 2)
         estimated_time_left = remaining_iterations * average_duration
 
         print(sample+1,'/', amount_samples, 'samples annotated. \t Estimated time left:', estimated_time_left, 'minutes')
-
-    ai_feedback.to_feather(f'data/ai_feedback-{annotation_llm}-{current_date}-v3.feather')
-
+    ai_feedback.to_feather(f'data/ai_feedback-{annotation_llm}-{current_date}.feather')
 
 
 if __name__ == "__main__":
     # start measurement
-    # measurement_process = subprocess.Popen(["python", "measuring_usage.py"])
+    measurement_process = subprocess.Popen(["python", "measuring_usage.py"])
 
-    # time.sleep(10)
-    # print('Annotation started')
+    time.sleep(10)
+    print('Annotation started')
     main()
-    # print('Annotation done')
-    # time.sleep(10)
+    print('Annotation done')
+    time.sleep(10)
     
     # stop measurement
-    # measurement_process.terminate()
+    measurement_process.terminate()
 
     print('All done!')
 
