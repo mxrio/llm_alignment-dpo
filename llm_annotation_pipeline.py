@@ -13,7 +13,9 @@ def main():
     # Define annotation parameters
     # amount_samples = 55                    # for testing purposes
     amount_samples = pref_data_labeled_sample.shape[0]
-    annotation_llm = 'llama2:13b-chat'       # possible others: llama2:13b-chat, llama2:70b-chat
+    # annotation_llm = 'llama2'                   # possible others: llama2:13b-chat, llama2:70b-chat
+    # annotation_llm = 'llama2:13b-chat'          # possible others: llama2:13b-chat, llama2:70b-chat
+    annotation_llm = 'llama2'                     # possible others: llama2:13b-chat, llama2:70b-chat
 
 
     # Function to get annotation from the LLM
@@ -153,7 +155,7 @@ def main():
 
     for sample in range(last_checkpoint, amount_samples):
         if sample % annotation_checkpoints == 0:
-            ai_feedback.to_feather(f'data/ai_feedback-{annotation_llm}-{current_date}.feather')
+            ai_feedback.to_feather(f'data/ai_feedback-{annotation_llm}-{current_date}-v3.feather')
             print('Annotation data saved')
 
         annotation_ai = get_annotation(pref_data_labeled_sample, pref_data_labeled_training, annotation_llm, sample).json()
