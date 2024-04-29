@@ -18,7 +18,7 @@ def main():
     # login(token="your_access_token")
 
     # Read dataset from pickle file
-    with open("data/custom_pref_data_7b.pickle", "rb") as f:
+    with open("data/custom_pref_data_70b.pickle", "rb") as f:
         raw_datasets = pickle.load(f)
 
     # indices = range(0,100)
@@ -132,7 +132,7 @@ def main():
 
     # path where the Trainer will save its checkpoints and logs
     # output_dir = 'data/zephyr-7b-dpo-lora'
-    output_dir = 'data/dpo_model-7b'
+    output_dir = 'data/dpo_model-70b'
 
     # based on config
     training_args = TrainingArguments(
@@ -145,7 +145,7 @@ def main():
         gradient_accumulation_steps=4,
         gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant":False},
-        hub_model_id="zephyr-7b-dpo-qlora",
+        hub_model_id="zephyr-70b-dpo-qlora",
         learning_rate=5.0e-6,
         log_level="info",
         logging_steps=10,
