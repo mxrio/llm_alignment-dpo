@@ -22,6 +22,7 @@ def main():
 
     # Function to get annotation from the LLM
     def get_annotation(benchmark_data, position=0, ip_adress='localhost'):
+        print('Annotation startet')
         
         messages = [
         {
