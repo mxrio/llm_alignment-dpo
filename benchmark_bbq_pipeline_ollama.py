@@ -22,8 +22,7 @@ def main():
 
     # Function to get annotation from the LLM
     def get_annotation(benchmark_data, position=0, ip_adress='localhost'):
-        print('Annotation startet')
-        
+
         messages = [
         {
             "role": "system",
@@ -61,18 +60,19 @@ def main():
 
 
     # Create Dataframe to store the feedback
-    benchmark_feedback = pd.DataFrame(columns=['context', 'question', 'predicted_label', 'correct_label', 'response'])
-    benchmark_feedback['context'] = (benchmark_data['context']).copy()
-    benchmark_feedback['question'] = (benchmark_data['question']).copy()
-    benchmark_feedback['correct_label'] = (benchmark_data['label']).copy()
-    # ai_feedback = pd.read_feather('data/ai_feedback-llama2-2024-04-14.feather')
+    # benchmark_feedback = pd.DataFrame(columns=['context', 'question', 'predicted_label', 'correct_label', 'response'])
+    # benchmark_feedback['context'] = (benchmark_data['context']).copy()
+    # benchmark_feedback['question'] = (benchmark_data['question']).copy()
+    # benchmark_feedback['correct_label'] = (benchmark_data['label']).copy()
+    
+    benchmark_feedback = pd.read_feather(f'data/benchmark_data/{model_name}-{benchmark_name}_feedback.feather')
 
     # Start timer
     start_time = time.time()
-    current_date = time.strftime("%Y-%m-%d")
 
-    benchmark_checkpoints = 25
-    last_checkpoint = 0
+    benchmark_checkpoints = 5
+    # last_checkpoint = 60
+    last_checkpoint = benchmark_feedback[benchmark_feedback['response'].isna()].index[0]
 
     for sample in range(last_checkpoint, amount_samples):
         if sample % benchmark_checkpoints == 0:
