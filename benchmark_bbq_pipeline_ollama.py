@@ -9,23 +9,20 @@ import time
 
 def main():
     # Load the Model
-    output_dir = 'data/zephyr-7b-dpo-lora'
+    # output_dir = 'data/zephyr-7b-dpo-lora'
 
-    tokenizer = AutoTokenizer.from_pretrained(output_dir)
-    model = AutoModelForCausalLM.from_pretrained(output_dir, load_in_4bit=True, device_map="auto")
+    # tokenizer = AutoTokenizer.from_pretrained(output_dir)
+    # model = AutoModelForCausalLM.from_pretrained(output_dir, load_in_4bit=True, device_map="auto")
 
     # Load the Benchmark Dataset
     benchmark_data = pd.read_parquet('data/benchmark_data/bbq_samples.parquet')
     benchmark_name = 'bbq'
-    model_name = 'llama2_7b'
+    model_name = 'baseline'
     amount_samples = benchmark_data.shape[0]
 
     # Function to get annotation from the LLM
-    # def get_annotation(dataset_eval, dataset_examples, model, position=0, reversed_order=False, ip_adress='localhost'):
-    def get_annotation(benchmark_data, position, tokenizer, model):
+    def get_annotation(benchmark_data, position=0, ip_adress='localhost'):
         
-
-        # We use the tokenizer's chat template to format each message - see https://huggingface.co/docs/transformers/main/en/chat_templating
         messages = [
         {
             "role": "system",
@@ -50,23 +47,16 @@ def main():
         # Final Prompt
         {"role": "user", "content": f"{benchmark_data['context'][position]} {benchmark_data['question'][position]} /// Answers 0: {benchmark_data['answ0'][position]}; Answers 1: {benchmark_data['answ1'][position]}; Answers 2: {benchmark_data['answ2'][position]} /// The best answer is number: "}
         ]
+        payload = {
+        'model': 'mistral',
+        'messages': messages,
+        'stream': False
+        }
 
-        # prepare the messages for the model
-        input_ids = tokenizer.apply_chat_template(messages, truncation=True, add_generation_prompt=True, return_tensors="pt").to("cuda")
-
-        # inference
-        outputs = model.generate(
-                input_ids=input_ids,
-                max_new_tokens=256,
-                do_sample=True,
-                temperature=0.7,
-                top_k=50,
-                top_p=0.95
-        )
-        raw_response = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
-        pre_cleaned_response = "".join(raw_response.split("[/INST]")[6])
-
-        return pre_cleaned_response
+        headers = {'Content-Type': 'application/json'}
+        response = requests.post(f'http://{ip_adress}:11434/api/chat', data=json.dumps(payload), headers=headers)
+    
+        return response
 
 
     # Create Dataframe to store the feedback
@@ -85,10 +75,10 @@ def main():
 
     for sample in range(last_checkpoint, amount_samples):
         if sample % benchmark_checkpoints == 0:
-            benchmark_feedback.to_feather(f'data/benchmark_data/{model_name}-{benchmark_name}_feedback.feather')
+            benchmark_feedback.to_feather(f'data/benchmark_data/{model_name}-{benchmark_name}_feedback.feather')    
             print('Benchmark data saved')
 
-        benchmark_feedback.loc[sample,'response'] = get_annotation(benchmark_data, sample, tokenizer, model)
+        benchmark_feedback.loc[sample,'response'] = get_annotation(benchmark_data, sample).json()['message']['content']
         
         # Estimate remaining time
         remaining_iterations = amount_samples - sample - 1
