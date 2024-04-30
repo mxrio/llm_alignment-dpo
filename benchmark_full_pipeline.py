@@ -202,7 +202,7 @@ def safety_bench():
     model = AutoModelForCausalLM.from_pretrained(output_dir, load_in_4bit=True, device_map="auto")
 
     # Load the Benchmark Dataset
-    benchmark_data = pd.read_parquet('data/benchmark_data/safety_bench_sample.parquet').reset_index(drop=True)
+    benchmark_data = pd.read_parquet('data/benchmark_data/safety_bench_sample.parquet')
     benchmark_name = 'safetybench'
     model_name = 'llama2_7b'
     amount_samples = benchmark_data.shape[0]
