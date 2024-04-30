@@ -16,7 +16,8 @@ def main():
 
     # Load the Benchmark Dataset
     benchmark_data = pd.read_parquet('data/benchmark_data/truthful_qa_sample.parquet')
-    benchmark_name = 'truthful_qa'
+    benchmark_name = 'truthfulqa'
+    model_name = 'llama2_7b'
     amount_samples = benchmark_data.shape[0]
 
     # Function to get annotation from the LLM
@@ -71,7 +72,7 @@ def main():
     # Create Dataframe to store the feedback
     benchmark_feedback = pd.DataFrame(columns=['question', 'predicted_label', 'correct_label', 'response'])
     benchmark_feedback['question'] = (benchmark_data['question']).copy()
-    # benchmark_feedback = benchmark_feedback.reset_index(drop=True)
+    benchmark_feedback['correct_label'] = (benchmark_data['label']).copy()
     # ai_feedback = pd.read_feather('data/ai_feedback-llama2-2024-04-14.feather')
 
     # Start timer
@@ -83,30 +84,20 @@ def main():
 
     for sample in range(last_checkpoint, amount_samples):
         if sample % benchmark_checkpoints == 0:
-            benchmark_feedback.to_feather(f'data/benchmark_data/{benchmark_name}_feedback.feather')
+            benchmark_feedback.to_feather(f'data/benchmark_data/{model_name}-{benchmark_name}_feedback.feather')
             print('Benchmark data saved')
 
         benchmark_feedback.loc[sample,'response'] = get_annotation(benchmark_data, sample, tokenizer, model)
-        # annotation_ai = get_annotation(pref_data_labeled_sample, pref_data_labeled_training, annotation_llm, sample).json()
-        # annotation_ai_reversed = get_annotation(pref_data_labeled_sample, pref_data_labeled_training, annotation_llm, sample, reversed_order=True).json()
-
-        # ai_feedback.loc[sample, 'ai'] = annotation_ai['message']['content']
-        # ai_feedback.loc[sample, 'ai_reversed'] = annotation_ai_reversed['message']['content']
-        # # ai_feedback.loc[i, 'duration_ai'] = round(annotation_ai['total_duration']/(1000000000), 2)
-        # # ai_feedback.loc[i, 'duration_ai_reversed'] = round(annotation_ai_reversed['total_duration']/(1000000000), 2)
-        # ai_feedback.loc[sample, 'response_ai'] = str(annotation_ai)
-        # ai_feedback.loc[sample, 'response_ai_reversed'] = str(annotation_ai_reversed)
         
         # Estimate remaining time
         remaining_iterations = amount_samples - sample - 1
         current_duration = time.time() - start_time
         average_duration = round(current_duration / (sample+1-last_checkpoint) / 60, 2) 
-        # average_duration = round(((ai_feedback['duration_ai'].mean() + ai_feedback['duration_ai_reversed'].mean()) / 2)/60, 2)
         estimated_time_left = remaining_iterations * average_duration
 
         print(sample+1,'/', amount_samples, 'samples evaluated. \t Estimated time left:', estimated_time_left, 'minutes')
     
-    benchmark_feedback.to_feather(f'data/benchmark_data/{benchmark_name}_feedback.feather')
+    benchmark_feedback.to_feather(f'data/benchmark_data/{model_name}-{benchmark_name}_feedback.feather')
 
 
 if __name__ == "__main__":
