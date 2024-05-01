@@ -8,6 +8,7 @@ import random
 import time
 
 
+
 def truthful_qa():
     # Load the Model
     output_dir = 'data/zephyr-7b-dpo-lora'
@@ -18,7 +19,7 @@ def truthful_qa():
     # Load the Benchmark Dataset
     benchmark_data = pd.read_parquet('data/benchmark_data/truthful_qa_sample.parquet')
     benchmark_name = 'truthfulqa'
-    model_name = 'llama2_7b'
+    model_name = 'llama2_70b'
     amount_samples = benchmark_data.shape[0]
 
     # Function to get annotation from the LLM
@@ -111,7 +112,7 @@ def bbq():
     # Load the Benchmark Dataset
     benchmark_data = pd.read_parquet('data/benchmark_data/bbq_samples.parquet')
     benchmark_name = 'bbq'
-    model_name = 'llama2_7b'
+    model_name = 'llama2_70b'
     amount_samples = benchmark_data.shape[0]
 
     # Function to get annotation from the LLM
@@ -175,7 +176,7 @@ def bbq():
     current_date = time.strftime("%Y-%m-%d")
 
     benchmark_checkpoints = 25
-    last_checkpoint = 0     #5900
+    last_checkpoint = 0    
 
     for sample in range(last_checkpoint, amount_samples):
         if sample % benchmark_checkpoints == 0:
@@ -204,7 +205,7 @@ def safety_bench():
     # Load the Benchmark Dataset
     benchmark_data = pd.read_parquet('data/benchmark_data/safety_bench_sample.parquet')
     benchmark_name = 'safetybench'
-    model_name = 'llama2_7b'
+    model_name = 'llama2_70b'
     amount_samples = benchmark_data.shape[0]
 
     # Function to get annotation from the LLM
@@ -291,7 +292,7 @@ def safety_bench():
 
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":    
     truthful_qa()
     bbq()
     safety_bench()
