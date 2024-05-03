@@ -17,7 +17,7 @@ def main():
     # Load the Benchmark Dataset
     benchmark_data = pd.read_parquet('data/benchmark_data/truthful_qa_sample.parquet')
     benchmark_name = 'truthfulqa'
-    model_name = 'llama2_7b'
+    model_name = 'baseline'
     amount_samples = benchmark_data.shape[0]
 
     # Function to get annotation from the LLM

@@ -73,3 +73,4 @@ data/benchmark_data/bbq/Religion.json
 data/benchmark_data/bbq/SES.json
 data/benchmark_data/bbq/Sexual_orientation.json
 .env
+data/zephyr-7b-dpo-lora/tokenizer.model
