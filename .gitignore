@@ -75,3 +75,12 @@ data/benchmark_data/bbq/Sexual_orientation.json
 .env
 data/zephyr-7b-dpo-lora/tokenizer.model
 .env
+data/dpo_model_13b/all_results.json
+data/dpo_model_13b/train_results.json
+data/dpo_model_13b/trainer_state.json
+data/dpo_model_70b/all_results.json
+data/dpo_model_70b/train_results.json
+data/dpo_model_70b/trainer_state.json
+data/dpo_model_7b/all_results.json
+data/dpo_model_7b/train_results.json
+data/dpo_model_7b/trainer_state.json
