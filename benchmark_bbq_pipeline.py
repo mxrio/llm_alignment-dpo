@@ -81,7 +81,7 @@ def main():
     current_date = time.strftime("%Y-%m-%d")
 
     benchmark_checkpoints = 25
-    last_checkpoint = 0
+    last_checkpoint = 0     #5900
 
     for sample in range(last_checkpoint, amount_samples):
         if sample % benchmark_checkpoints == 0:

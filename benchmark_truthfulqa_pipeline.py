@@ -16,8 +16,8 @@ def main():
 
     # Load the Benchmark Dataset
     benchmark_data = pd.read_parquet('data/benchmark_data/truthful_qa_sample.parquet')
-    benchmark_name = 'truthful_qa'
-    model_name = 'llama2_7b'
+    benchmark_name = 'truthfulqa'
+    model_name = 'baseline'
     amount_samples = benchmark_data.shape[0]
 
     # Function to get annotation from the LLM
@@ -72,6 +72,7 @@ def main():
     # Create Dataframe to store the feedback
     benchmark_feedback = pd.DataFrame(columns=['question', 'predicted_label', 'correct_label', 'response'])
     benchmark_feedback['question'] = (benchmark_data['question']).copy()
+    benchmark_feedback['correct_label'] = (benchmark_data['label']).copy()
     # ai_feedback = pd.read_feather('data/ai_feedback-llama2-2024-04-14.feather')
 
     # Start timer

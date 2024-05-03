@@ -1,31 +1,41 @@
 # Imports
 import pandas as pd
-import requests 
+# import requests 
 import json
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+# import torch
+# from transformers import AutoTokenizer, AutoModelForCausalLM
 import random
 import time
+from openai import OpenAI
+
+
+
 
 def main():
-    # Load the Model
-    output_dir = 'data/zephyr-7b-dpo-lora'
 
-    tokenizer = AutoTokenizer.from_pretrained(output_dir)
-    model = AutoModelForCausalLM.from_pretrained(output_dir, load_in_4bit=True, device_map="auto")
+    
+    # # Load the Model
+    # output_dir = 'data/zephyr-7b-dpo-lora'
+
+    # tokenizer = AutoTokenizer.from_pretrained(output_dir)
+    # model = AutoModelForCausalLM.from_pretrained(output_dir, load_in_4bit=True, device_map="auto")
 
     # Load the Benchmark Dataset
     benchmark_data = pd.read_parquet('data/benchmark_data/safety_bench_sample.parquet')
     benchmark_name = 'safetybench'
-    model_name = 'baseline'
+    model_name = 'gpt'
     amount_samples = benchmark_data.shape[0]
+    # amount_samples = 5
 
     # Function to get annotation from the LLM
     # def get_annotation(dataset_eval, dataset_examples, model, position=0, reversed_order=False, ip_adress='10.1.25.122'):
-    def get_annotation(benchmark_data, position, tokenizer, model):
+    client = OpenAI()
+
+    def get_annotation(benchmark_data, position):
         
-        # Define the chat messages
         example_labels = ['0', '2', '2', '1', '0']
+
+        # Define the chat messages
         messages = [
             {
                 "role": "system",
@@ -52,23 +62,12 @@ def main():
             final_prompt += f" Answer {j+1}: {option};"
         final_prompt += " /// The best answer is number: "
         messages.append({"role": "user", "content": final_prompt})
+        
+        completion = client.chat.completions.create(model="gpt-3.5-turbo", messages=messages)
 
-        # prepare the messages for the model
-        input_ids = tokenizer.apply_chat_template(messages, truncation=True, add_generation_prompt=True, return_tensors="pt").to("cuda")
 
-        # inference
-        outputs = model.generate(
-                input_ids=input_ids,
-                max_new_tokens=256,
-                do_sample=True,
-                temperature=0.7,
-                top_k=50,
-                top_p=0.95
-        )
-        raw_response = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
-        pre_cleaned_response = "".join(raw_response.split("[/INST]")[6])
-
-        return pre_cleaned_response
+        return completion.choices[0].message.content
+        # return pre_cleaned_response
 
 
     # Create Dataframe to store the feedback
@@ -90,7 +89,7 @@ def main():
             benchmark_feedback.to_feather(f'data/benchmark_data/{model_name}-{benchmark_name}_feedback.feather')
             print('Benchmark data saved')
 
-        benchmark_feedback.loc[sample,'response'] = get_annotation(benchmark_data, sample, tokenizer, model)
+        benchmark_feedback.loc[sample,'response'] = get_annotation(benchmark_data, sample)
         
         # Estimate remaining time
         remaining_iterations = amount_samples - sample - 1
